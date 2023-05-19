@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Knight.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">xxlchess_scaffold</a> &gt; <a href="index.source.html" class="el_package">XXLChess</a> &gt; <span class="el_source">Knight.java</span></div><h1>Knight.java</h1><pre class="source lang-java linenums">package XXLChess;
+
+import processing.core.PImage;
+
+import java.awt.*;
+import java.util.ArrayList;
+
+public class Knight extends ChessPiece{
+
+    public Knight(Color color, int x, int y) {
+<span class="fc" id="L11">        super(Type.KNIGHT, color, x, y, 2);</span>
+<span class="fc bfc" id="L12" title="All 2 branches covered.">        if (color == Color.BLACK) {</span>
+<span class="fc" id="L13">            image = LoadImage.bKnight;</span>
+        } else {
+<span class="fc" id="L15">            image = LoadImage.wKnight;</span>
+        }
+<span class="fc" id="L17">    }</span>
+
+    /**
+     * Get knight's valid area according to the rule.
+     */
+    @Override
+    public ArrayList&lt;int[]&gt; movingArea(Map map) {
+<span class="fc" id="L24">        ArrayList&lt;int[]&gt; possibleMoves = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L25">        int[][] offset = {{-2, -1}, {-2, 1}, {-1, -2}, {-1, 2}, {1, -2}, {1, 2}, {2, -1}, {2, 1}};</span>
+<span class="fc bfc" id="L26" title="All 2 branches covered.">        for (int i = 0; i &lt; offset.length; i++){</span>
+<span class="fc" id="L27">            int new_x = this.x + offset[i][0];</span>
+<span class="fc" id="L28">            int new_y = this.y + offset[i][1];</span>
+<span class="fc bfc" id="L29" title="All 2 branches covered.">            if (isValidPosition(map, this.x, this.y, new_x, new_y)){</span>
+<span class="fc" id="L30">                possibleMoves.add(new int[]{new_y, new_x});</span>
+            } else {
+<span class="pc bpc" id="L32" title="3 of 10 branches missed.">                if (new_x &gt;= 0 &amp;&amp; new_y &gt;= 0 &amp;&amp; new_x &lt;= 13 &amp;&amp; new_y &lt;= 13 &amp;&amp; map.piece[new_x][new_y].color != color) {</span>
+<span class="fc" id="L33">                    possibleMoves.add(new int[]{new_y, new_x});</span>
+                }
+            }
+        }
+<span class="fc" id="L37">        return possibleMoves;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

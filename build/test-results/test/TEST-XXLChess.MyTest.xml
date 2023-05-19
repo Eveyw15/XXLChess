@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="XXLChess.MyTest" tests="16" skipped="0" failures="0" errors="0" timestamp="2023-05-19T13:30:21" hostname="LAPTOP-EVEYW05" time="0.11">
+  <properties/>
+  <testcase name="testLoadingBoard()" classname="XXLChess.MyTest" time="0.084"/>
+  <testcase name="testGetPiece()" classname="XXLChess.MyTest" time="0.005"/>
+  <testcase name="testCamel()" classname="XXLChess.MyTest" time="0.003"/>
+  <testcase name="testQueen()" classname="XXLChess.MyTest" time="0.0"/>
+  <testcase name="testKing()" classname="XXLChess.MyTest" time="0.001"/>
+  <testcase name="testPawn()" classname="XXLChess.MyTest" time="0.0"/>
+  <testcase name="testRook()" classname="XXLChess.MyTest" time="0.0"/>
+  <testcase name="testArchbishop()" classname="XXLChess.MyTest" time="0.001"/>
+  <testcase name="testGeneral()" classname="XXLChess.MyTest" time="0.001"/>
+  <testcase name="testAmazon()" classname="XXLChess.MyTest" time="0.001"/>
+  <testcase name="testBishop()" classname="XXLChess.MyTest" time="0.001"/>
+  <testcase name="testChancellor()" classname="XXLChess.MyTest" time="0.0"/>
+  <testcase name="testKnight()" classname="XXLChess.MyTest" time="0.0"/>
+  <testcase name="testTimeDisplay()" classname="XXLChess.MyTest" time="0.001"/>
+  <testcase name="testGetMouseCoordinate()" classname="XXLChess.MyTest" time="0.003"/>
+  <testcase name="testSetState()" classname="XXLChess.MyTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

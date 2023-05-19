@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Map.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">xxlchess_scaffold</a> &gt; <a href="index.source.html" class="el_package">XXLChess</a> &gt; <span class="el_source">Map.java</span></div><h1>Map.java</h1><pre class="source lang-java linenums">package XXLChess;
+
+import java.io.*;
+import java.util.*;
+
+import com.google.common.base.MoreObjects;
+import processing.core.PApplet;
+import processing.core.PImage;
+import static XXLChess.App.*;
+import static XXLChess.Background.State.*;
+import static XXLChess.Interaction.*;
+import static XXLChess.Background.*;
+
+public class Map {
+<span class="fc" id="L15">    private int flashCounter = -1;</span>
+<span class="fc" id="L16">    private boolean isFlashing = false;</span>
+<span class="fc" id="L17">    private boolean isFlashOn = false;</span>
+    public ArrayList&lt;int[]&gt; changedPosition;
+    Character[][] piece_default;
+    ChessPiece[][] piece;
+    Background[][] background;
+<span class="fc" id="L22">    private Random random = new Random();</span>
+    public App app;
+
+<span class="fc" id="L25">    public Map(App app, String layout) {</span>
+<span class="fc" id="L26">        this.app = app;</span>
+<span class="fc" id="L27">        piece_default = new Character[BOARD_WIDTH][BOARD_WIDTH];</span>
+<span class="fc" id="L28">        piece = new ChessPiece[BOARD_WIDTH][BOARD_WIDTH];</span>
+<span class="fc" id="L29">        background = new Background[BOARD_WIDTH][BOARD_WIDTH];</span>
+<span class="fc" id="L30">        loadingBoard();</span>
+<span class="pc bpc" id="L31" title="1 of 2 branches missed.">        if(layout != null){</span>
+<span class="nc" id="L32">            loadingPiece(layout);</span>
+        }
+<span class="fc" id="L34">    }</span>
+
+    /**
+     * Draw board and pieces.
+     */
+    public void draw() {
+        // draw chess board
+<span class="nc bnc" id="L41" title="All 2 branches missed.">        for (int i = 0; i &lt; background.length; i++){</span>
+<span class="nc bnc" id="L42" title="All 2 branches missed.">            for (int j = 0; j &lt; background[i].length; j++){</span>
+<span class="nc" id="L43">                    background[i][j].draw(app);</span>
+            }
+        }
+        // draw chess piece
+<span class="nc bnc" id="L47" title="All 2 branches missed.">        for (int i = 0; i &lt; piece.length; i++){</span>
+<span class="nc bnc" id="L48" title="All 2 branches missed.">            for (int j = 0; j &lt; piece[i].length; j++) {</span>
+<span class="nc bnc" id="L49" title="All 2 branches missed.">                if (piece[i][j] != null) {</span>
+<span class="nc" id="L50">                    piece[i][j].draw(app, piece[i][j].getImage(), piece[i][j].getX(), piece[i][j].getY());</span>
+                    //isCheckmate(piece[i][j]);
+<span class="nc bnc" id="L52" title="All 2 branches missed.">                    if (piece[i][j].isKingInCheck){</span>
+<span class="nc" id="L53">                        app.fill(255);</span>
+<span class="nc" id="L54">                        app.textSize(32);</span>
+<span class="nc" id="L55">                        app.text(&quot;Check!&quot;, WIDTH - SIDEBAR / 2, HEIGHT / 2);</span>
+
+<span class="nc bnc" id="L57" title="All 2 branches missed.">                        if (flashCounter == -1) {</span>
+<span class="nc" id="L58">                            isFlashing = true;  // start flashing</span>
+<span class="nc" id="L59">                            flashCounter = 6;   // 2 * 3 flashes</span>
+                        }
+                        // Create a flashing effect
+<span class="nc bnc" id="L62" title="All 2 branches missed.">                    if (isFlashing) {</span>
+<span class="nc bnc" id="L63" title="All 2 branches missed.">                        if (app.frameCount % 30 == 0) { // this will be true every 0.5 seconds</span>
+<span class="nc bnc" id="L64" title="All 2 branches missed.">                            isFlashOn = !isFlashOn;</span>
+<span class="nc" id="L65">                            flashCounter--;</span>
+<span class="nc bnc" id="L66" title="All 2 branches missed.">                            if (flashCounter == 0) {</span>
+<span class="nc" id="L67">                                isFlashing = false; // end flashing</span>
+                            }
+                        }
+<span class="nc bnc" id="L70" title="All 2 branches missed.">                        if (isFlashOn) {</span>
+<span class="nc" id="L71">                            app.fill(215, 0, 0); // fill red color</span>
+                        } else {
+<span class="nc bnc" id="L73" title="All 2 branches missed.">                            if (background[j][i].color == Color.BLACK){ // set tile color to regular</span>
+<span class="nc" id="L74">                                app.fill(181, 136, 99);</span>
+                            } else {
+<span class="nc" id="L76">                                app.fill(240, 217, 181);</span>
+                            }
+                        }
+<span class="nc" id="L79">                        app.rect(j * CELLSIZE, i * CELLSIZE, CELLSIZE, CELLSIZE);</span>
+
+<span class="nc" id="L81">                        app.image(this.piece[i][j].image, j * CELLSIZE, i * CELLSIZE);  // draw the King's image again</span>
+                        }
+                    }
+                }
+            }
+        }
+
+<span class="nc" id="L88">    }</span>
+
+    /**
+     * Get the piece that mouse clicked and its movable tiles.
+     */
+    public void selectedPiece(int[] coordinate){
+<span class="nc" id="L94">        int x = coordinate[0];</span>
+<span class="nc" id="L95">        int y = coordinate[1];</span>
+<span class="nc bnc" id="L96" title="All 4 branches missed.">        if (selectedX == -1 &amp;&amp; selectedY == -1){ // select a piece for the first time</span>
+<span class="nc" id="L97">            selectedX = x;</span>
+<span class="nc" id="L98">            selectedY = y;</span>
+<span class="nc" id="L99">            changedPosition = piece[selectedY][selectedX].movingArea(this); // get tiles that need to change its color</span>
+<span class="nc" id="L100">            possibleDestination(piece[selectedY][selectedX]);   // set tiles' state</span>
+<span class="nc" id="L101">            selectedX = -1;</span>
+<span class="nc" id="L102">            selectedY = -1;</span>
+
+<span class="nc bnc" id="L104" title="All 4 branches missed.">        } else if (selectedX != -1 &amp;&amp; selectedY != -1){ // change to a new piece</span>
+<span class="nc" id="L105">            selectedX = x;</span>
+<span class="nc" id="L106">            selectedY = y;</span>
+<span class="nc" id="L107">            changedPosition = piece[selectedY][selectedX].movingArea(this);</span>
+<span class="nc" id="L108">            possibleDestination(piece[selectedY][selectedX]);</span>
+<span class="nc" id="L109">            selectedX = -1;</span>
+<span class="nc" id="L110">            selectedY = -1;</span>
+        }
+<span class="nc" id="L112">    }</span>
+
+    /**
+     * Set different color state for the possible destinations.
+     */
+    public void possibleDestination(ChessPiece selected){
+<span class="fc" id="L118">        background[selected.y][selected.x].setState(SELECTED);</span>
+<span class="fc bfc" id="L119" title="All 2 branches covered.">        for (int i = 0; i &lt; changedPosition.size(); i++){</span>
+<span class="fc" id="L120">            int dx = changedPosition.get(i)[1];</span>
+<span class="fc" id="L121">            int dy = changedPosition.get(i)[0];</span>
+
+<span class="fc bfc" id="L123" title="All 2 branches covered.">            if (piece[dx][dy] != null){ // having piece at there</span>
+<span class="pc bpc" id="L124" title="1 of 2 branches missed.">                if (piece[dx][dy].type == ChessPiece.Type.KING) {   // if the piece is a king</span>
+<span class="nc" id="L125">                    background[dy][dx].setState(CHECK_MATE);        // set color to red</span>
+                } else {
+<span class="fc" id="L127">                    background[dy][dx].setState(CAPTURED);          // set color to orange</span>
+                }
+            } else {
+<span class="fc" id="L130">                background[dy][dx].setState(HIGHLIGHTED);           // set color to blue (no piece)</span>
+            }
+        }
+<span class="fc" id="L133">    }</span>
+
+    /**
+     * Set piece's destination and change the original and later position's color.
+     */
+    public boolean isPieceMoving(ChessPiece selected, int end_i, int end_j) {
+<span class="fc" id="L139">        Background original = background[selected.y][selected.x];   // store the original place</span>
+<span class="fc bfc" id="L140" title="All 2 branches covered.">        if (isMoveValid(selected, end_i, end_j)) {</span>
+<span class="fc" id="L141">            piece[selected.x][selected.y] = null;   // clear the original piece</span>
+<span class="fc" id="L142">            selected.setX(end_j);   // set piece at the destination</span>
+<span class="fc" id="L143">            selected.setY(end_i);</span>
+<span class="pc bpc" id="L144" title="1 of 4 branches missed.">            if (selected.type == ChessPiece.Type.PAWN &amp;&amp; end_j == 7) {  // if it is a pawn, turn into a queen</span>
+<span class="nc" id="L145">                piece[selected.x][selected.y] = new Queen(selected.color, selected.x, selected.y);</span>
+            } else {    // update the piece collection
+<span class="fc" id="L147">                piece[selected.x][selected.y] = selected;</span>
+            }
+<span class="fc" id="L149">            cancelSelection(background[original.i][original.j]);    // delete the original highlighted color</span>
+<span class="fc" id="L150">            background[original.i][original.j].setState(Background.State.MOVING);   // update the background to green</span>
+<span class="fc" id="L151">            background[end_i][end_j].setState(Background.State.MOVING);</span>
+
+<span class="fc" id="L153">            changedPosition.add(new int[]{original.i, original.j}); // add coordinate of 2 green tile</span>
+<span class="fc" id="L154">            changedPosition.add(new int[]{end_j, end_i});</span>
+<span class="fc" id="L155">            return true;</span>
+        } else { // invalid area
+<span class="fc" id="L157">            cancelSelection(background[original.i][original.j]);    // cannot move delete its original color</span>
+<span class="fc" id="L158">            return false;</span>
+        }
+    }
+
+    /**
+     * Reset the background after piece moving.
+     */
+    public void cancelSelection(Background startPiece) {
+<span class="fc bfc" id="L166" title="All 2 branches covered.">        if (background[startPiece.i][startPiece.j].state == SELECTED)</span>
+<span class="fc" id="L167">            background[startPiece.i][startPiece.j].setState(REGULAR);</span>
+<span class="fc bfc" id="L168" title="All 2 branches covered.">        for (int[] position : changedPosition) {</span>
+<span class="pc bpc" id="L169" title="1 of 2 branches missed.">            if (background[position[0]][position[1]].state == CHECK_MATE)</span>
+<span class="nc" id="L170">                piece[position[1]][position[0]].isKingInCheck = false;  // not in check anymore</span>
+<span class="fc" id="L171">            background[position[0]][position[1]].setState(REGULAR);</span>
+<span class="fc" id="L172">        }</span>
+<span class="fc" id="L173">        changedPosition.clear();</span>
+<span class="fc" id="L174">    }</span>
+
+    /**
+     * Whether the piece can move.
+     */
+    public boolean isMoveValid(ChessPiece selected, int i, int j) {
+<span class="pc bpc" id="L180" title="1 of 4 branches missed.">        if (selected.x == j &amp;&amp; selected.y == i){    // click the same piece twice</span>
+<span class="nc" id="L181">            return false;</span>
+<span class="fc bfc" id="L182" title="All 4 branches covered.">        } else if (piece[j][i] != null &amp;&amp; piece[j][i].color == selected.color){ // click the piece with the same color</span>
+<span class="fc" id="L183">            cancelSelection(background[selected.y][selected.x]);</span>
+<span class="fc" id="L184">            return false;</span>
+<span class="fc bfc" id="L185" title="All 4 branches covered.">        } else if (background[i][j].state != CAPTURED &amp;&amp; background[i][j].state != HIGHLIGHTED){    // the destination haven't been highlighted</span>
+<span class="fc" id="L186">            return false;</span>
+        }
+<span class="fc" id="L188">        return true;</span>
+    }
+
+    /**
+    * AI movement.
+    */
+    public int[] bestMovement() {
+<span class="nc" id="L195">        double maxValue = 0;</span>
+<span class="nc" id="L196">        ChessPiece nextPiece = null;</span>
+<span class="nc" id="L197">        ChessPiece originalPiece = null;</span>
+<span class="nc" id="L198">        List&lt;ChessPiece&gt; blackPieces = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L199" title="All 2 branches missed.">        for (int i = 0; i &lt; piece.length; i++) {</span>
+<span class="nc bnc" id="L200" title="All 2 branches missed.">            for (int j = 0; j &lt; piece[i].length; j++) {</span>
+<span class="nc bnc" id="L201" title="All 4 branches missed.">                if (piece[i][j] != null &amp;&amp; piece[i][j].color == Color.BLACK) {</span>
+<span class="nc" id="L202">                    blackPieces.add(piece[i][j]);   // store all black pieces</span>
+<span class="nc bnc" id="L203" title="All 2 branches missed.">                    for (int[] position : changedPosition) {</span>
+<span class="nc" id="L204">                        background[position[0]][position[1]].setState(REGULAR); // reset background state</span>
+<span class="nc" id="L205">                    }</span>
+<span class="nc" id="L206">                    changedPosition.clear();</span>
+<span class="nc" id="L207">                    changedPosition = piece[i][j].movingArea(this); // find movable position for that black piece</span>
+<span class="nc" id="L208">                    possibleDestination(piece[i][j]);   // set background state</span>
+<span class="nc bnc" id="L209" title="All 2 branches missed.">                    for (int a = 0; a &lt; changedPosition.size(); a++) {</span>
+<span class="nc" id="L210">                        ChessPiece tempPiece = getPiece(this, changedPosition.get(a));</span>
+<span class="nc bnc" id="L211" title="All 4 branches missed.">                        if (tempPiece != null &amp;&amp; tempPiece.value &gt; maxValue) {  // if there is a white piece in its movable position</span>
+<span class="nc" id="L212">                            maxValue = tempPiece.value; // choose the one with the highest value</span>
+<span class="nc" id="L213">                            nextPiece = tempPiece;</span>
+<span class="nc" id="L214">                            originalPiece = piece[i][j];</span>
+                        }
+                    }
+<span class="nc" id="L217">                    cancelSelection(background[j][i]);  // clear its highlighted background</span>
+                }
+            }
+        }
+<span class="nc bnc" id="L221" title="All 2 branches missed.">        if (nextPiece == null){ // if black piece can't attack white piece</span>
+<span class="nc" id="L222">            int[] num = null;</span>
+<span class="nc bnc" id="L223" title="All 2 branches missed.">            while (num == null) {</span>
+<span class="nc" id="L224">                originalPiece = blackPieces.get(random.nextInt(blackPieces.size()));    // choose a black piece randomly</span>
+<span class="nc" id="L225">                changedPosition.clear();</span>
+<span class="nc" id="L226">                changedPosition = originalPiece.movingArea(this);</span>
+<span class="nc bnc" id="L227" title="All 2 branches missed.">                if (changedPosition.size() != 0)</span>
+<span class="nc" id="L228">                    num = changedPosition.get(random.nextInt(changedPosition.size()));  // choose a destination randomly</span>
+            }
+<span class="nc" id="L230">            return new int[] {originalPiece.x, originalPiece.y, num[1], num[0]};</span>
+        } else
+<span class="nc" id="L232">            return new int[] {originalPiece.x, originalPiece.y, nextPiece.x, nextPiece.y};</span>
+    }
+
+    /**
+     * Checkmate.
+     */
+    public boolean isCheckmate(Color color){
+<span class="nc bnc" id="L239" title="All 2 branches missed.">        for (int i = 0; i &lt; piece.length; i++){</span>
+<span class="nc bnc" id="L240" title="All 2 branches missed.">            for (int j = 0; j &lt; piece[i].length; j++){</span>
+                // if the king is in check and has the same color with opponent
+<span class="nc bnc" id="L242" title="All 6 branches missed.">                if (piece[i][j] != null &amp;&amp; piece[i][j].isKingInCheck &amp;&amp; piece[i][j].color == color){</span>
+<span class="nc" id="L243">                    return true;</span>
+                }
+            }
+        }
+<span class="nc" id="L247">        return false;</span>
+    }
+
+
+    /**
+     * Initialization for board.
+     */
+    private void loadingBoard() {
+
+<span class="fc bfc" id="L256" title="All 2 branches covered.">        for (int i = 0; i &lt; BOARD_WIDTH; i++) {</span>
+<span class="fc bfc" id="L257" title="All 2 branches covered.">            for (int j = 0; j &lt; BOARD_WIDTH; j++) {</span>
+<span class="fc" id="L258">                int x = i * CELLSIZE;</span>
+<span class="fc" id="L259">                int y = j * CELLSIZE;</span>
+<span class="fc bfc" id="L260" title="All 2 branches covered.">                if ((i + j) % 2 == 0) {</span>
+<span class="fc" id="L261">                    background[i][j] = new Background(Color.WHITE, i, j);</span>
+                } else {
+<span class="fc" id="L263">                    background[i][j] = new Background(Color.BLACK, i, j);</span>
+                }
+            }
+        }
+<span class="fc" id="L267">    }</span>
+
+    /**
+     * Initialization for pieces.
+     */
+    private void loadingPiece(String filename) {
+        try {
+<span class="nc" id="L274">            File f = new File(filename);</span>
+<span class="nc" id="L275">            Scanner scan = new Scanner(f);</span>
+<span class="nc bnc" id="L276" title="All 2 branches missed.">            for (int i = 0; i &lt; BOARD_WIDTH; i++) {</span>
+<span class="nc" id="L277">                String line = scan.nextLine();</span>
+<span class="nc bnc" id="L278" title="All 2 branches missed.">                for (int j = 0; j &lt; line.length(); j++) {</span>
+<span class="nc" id="L279">                    char yAxis = line.charAt(j);</span>
+<span class="nc" id="L280">                    piece_default[i][j] = yAxis;</span>
+<span class="nc bnc" id="L281" title="All 2 branches missed.">                    if (yAxis == 'R') {</span>
+<span class="nc" id="L282">                        piece[i][j] = new Rook(Color.BLACK, i, j);</span>
+<span class="nc bnc" id="L283" title="All 2 branches missed.">                    } else if (yAxis == 'r') {</span>
+<span class="nc" id="L284">                        piece[i][j] = new Rook(Color.WHITE, i, j);</span>
+<span class="nc bnc" id="L285" title="All 2 branches missed.">                    } else if (yAxis == 'N') {</span>
+<span class="nc" id="L286">                        piece[i][j] = new Knight(Color.BLACK, i, j);</span>
+<span class="nc bnc" id="L287" title="All 2 branches missed.">                    } else if (yAxis == 'n') {</span>
+<span class="nc" id="L288">                        piece[i][j] = new Knight(Color.WHITE, i, j);</span>
+<span class="nc bnc" id="L289" title="All 2 branches missed.">                    } else if (yAxis == 'B') {</span>
+<span class="nc" id="L290">                        piece[i][j] = new Bishop(Color.BLACK, i, j);</span>
+<span class="nc bnc" id="L291" title="All 2 branches missed.">                    } else if (yAxis == 'b') {</span>
+<span class="nc" id="L292">                        piece[i][j] = new Bishop(Color.WHITE, i, j);</span>
+<span class="nc bnc" id="L293" title="All 2 branches missed.">                    } else if (yAxis == 'H') {</span>
+<span class="nc" id="L294">                        piece[i][j] = new Archbishop(Color.BLACK, i, j);</span>
+<span class="nc bnc" id="L295" title="All 2 branches missed.">                    } else if (yAxis == 'h') {</span>
+<span class="nc" id="L296">                        piece[i][j] = new Archbishop(Color.WHITE, i, j);</span>
+<span class="nc bnc" id="L297" title="All 2 branches missed.">                    } else if (yAxis == 'C') {</span>
+<span class="nc" id="L298">                        piece[i][j] = new Camel(Color.BLACK, i, j);</span>
+<span class="nc bnc" id="L299" title="All 2 branches missed.">                    } else if (yAxis == 'c') {</span>
+<span class="nc" id="L300">                        piece[i][j] = new Camel(Color.WHITE, i, j);</span>
+<span class="nc bnc" id="L301" title="All 2 branches missed.">                    } else if (yAxis == 'G') {</span>
+<span class="nc" id="L302">                        piece[i][j] = new General(Color.BLACK, i, j);</span>
+<span class="nc bnc" id="L303" title="All 2 branches missed.">                    } else if (yAxis == 'g') {</span>
+<span class="nc" id="L304">                        piece[i][j] = new General(Color.WHITE, i, j);</span>
+<span class="nc bnc" id="L305" title="All 2 branches missed.">                    } else if (yAxis == 'A') {</span>
+<span class="nc" id="L306">                        piece[i][j] = new Amazon(Color.BLACK, i, j);</span>
+<span class="nc bnc" id="L307" title="All 2 branches missed.">                    } else if (yAxis == 'a') {</span>
+<span class="nc" id="L308">                        piece[i][j] = new Amazon(Color.WHITE, i, j);</span>
+<span class="nc bnc" id="L309" title="All 2 branches missed.">                    } else if (yAxis == 'K') {</span>
+<span class="nc" id="L310">                        piece[i][j] = new King(Color.BLACK, i, j);</span>
+<span class="nc bnc" id="L311" title="All 2 branches missed.">                    } else if (yAxis == 'k') {</span>
+<span class="nc" id="L312">                        piece[i][j] = new King(Color.WHITE, i, j);</span>
+<span class="nc bnc" id="L313" title="All 2 branches missed.">                    } else if (yAxis == 'E') {</span>
+<span class="nc" id="L314">                        piece[i][j] = new Chancellor(Color.BLACK, i, j);</span>
+<span class="nc bnc" id="L315" title="All 2 branches missed.">                    } else if (yAxis == 'e') {</span>
+<span class="nc" id="L316">                        piece[i][j] = new Chancellor(Color.WHITE, i, j);</span>
+<span class="nc bnc" id="L317" title="All 2 branches missed.">                    } else if (yAxis == 'P') {</span>
+<span class="nc" id="L318">                        piece[i][j] = new Pawn(Color.BLACK, i, j);</span>
+<span class="nc bnc" id="L319" title="All 2 branches missed.">                    } else if (yAxis == 'p') {</span>
+<span class="nc" id="L320">                        piece[i][j] = new Pawn(Color.WHITE, i, j);</span>
+<span class="nc bnc" id="L321" title="All 2 branches missed.">                    } else if (yAxis == 'Q') {</span>
+<span class="nc" id="L322">                        piece[i][j] = new Queen(Color.BLACK, i, j);</span>
+<span class="nc bnc" id="L323" title="All 2 branches missed.">                    } else if (yAxis == 'q') {</span>
+<span class="nc" id="L324">                        piece[i][j] = new Queen(Color.WHITE, i, j);</span>
+                    }
+                }
+            }
+<span class="nc" id="L328">            scan.close();</span>
+<span class="nc" id="L329">        } catch (IOException e) {</span>
+<span class="nc" id="L330">            System.out.printf(&quot;Error reading map %s\n&quot;, filename);</span>
+<span class="nc" id="L331">            e.printStackTrace();</span>
+<span class="nc" id="L332">        }</span>
+<span class="nc" id="L333">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

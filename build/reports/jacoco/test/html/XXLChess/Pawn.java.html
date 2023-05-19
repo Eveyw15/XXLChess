@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Pawn.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">xxlchess_scaffold</a> &gt; <a href="index.source.html" class="el_package">XXLChess</a> &gt; <span class="el_source">Pawn.java</span></div><h1>Pawn.java</h1><pre class="source lang-java linenums">package XXLChess;
+
+import processing.core.PImage;
+
+import java.awt.*;
+import java.util.ArrayList;
+
+import static XXLChess.App.*;
+import static XXLChess.Background.State.*;
+
+public class Pawn extends ChessPiece{
+
+<span class="fc" id="L13">    private boolean hasMoved = false;</span>
+    public Pawn(Color color, int x, int y) {
+<span class="fc" id="L15">        super(Type.PAWN, color, x, y, 1);</span>
+<span class="fc bfc" id="L16" title="All 2 branches covered.">        if (color == Color.BLACK) {</span>
+<span class="fc" id="L17">            image = LoadImage.bPawn;    // load black pawn image</span>
+        } else {
+<span class="fc" id="L19">            image = LoadImage.wPawn;    // load white pawn image</span>
+        }
+<span class="fc" id="L21">    }</span>
+
+    /**
+     * Get pawn's valid area according to the rule.
+     */
+    @Override
+    public ArrayList&lt;int[]&gt; movingArea(Map map) {
+<span class="fc" id="L28">        ArrayList&lt;int[]&gt; possibleMoves = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L29" title="All 2 branches covered.">        if (color == Color.WHITE) { // white pawn</span>
+<span class="fc bfc" id="L30" title="All 2 branches covered.">            if (x != 12){   // if not at line 13, pawn is already moved</span>
+<span class="fc" id="L31">                hasMoved = true;</span>
+            }
+<span class="pc bpc" id="L33" title="1 of 4 branches missed.">            if (x == 12 &amp;&amp; !hasMoved) { // haven't moved before</span>
+<span class="fc" id="L34">                int[][] offset = {{1, 0}, {2, 0}};  // can move forward 2 space</span>
+<span class="fc bfc" id="L35" title="All 2 branches covered.">                for (int i = 0; i &lt; 2; i++) {</span>
+<span class="fc" id="L36">                    int new_x = this.x - offset[i][0];</span>
+<span class="fc" id="L37">                    int new_y = this.y + offset[i][1];</span>
+<span class="pc bpc" id="L38" title="1 of 2 branches missed.">                    if (!isValidPosition(map, this.x, this.y, new_x, new_y)){</span>
+                        // If blocked by opponent piece, add it
+<span class="nc bnc" id="L40" title="All 10 branches missed.">                        if (new_x &gt;= 0 &amp;&amp; new_y &gt;= 0 &amp;&amp; new_x &lt;= 13 &amp;&amp; new_y &lt;= 13 &amp;&amp; map.piece[new_x][new_y].color != color)</span>
+<span class="nc" id="L41">                            possibleMoves.add(new int[]{new_y, new_x});</span>
+<span class="nc" id="L42">                        return possibleMoves;</span>
+                    } else{
+<span class="fc" id="L44">                        possibleMoves.add(new int[]{new_y, new_x});</span>
+                    }
+                }
+<span class="fc" id="L47">            } else {    // moved before</span>
+<span class="fc" id="L48">                int new_x = this.x - 1; // can move forward 1 space</span>
+<span class="fc" id="L49">                int new_y = this.y;</span>
+<span class="pc bpc" id="L50" title="1 of 2 branches missed.">                if (isValidPosition(map, this.x, this.y, new_x, new_y)){</span>
+<span class="fc" id="L51">                    possibleMoves.add(new int[]{new_y, new_x});</span>
+                } else {
+<span class="nc bnc" id="L53" title="All 10 branches missed.">                    if (new_x &gt;= 0 &amp;&amp; new_y &gt;= 0 &amp;&amp; new_x &lt;= 13 &amp;&amp; new_y &lt;= 13 &amp;&amp; map.piece[new_x][new_y].color != color) {</span>
+<span class="nc" id="L54">                        possibleMoves.add(new int[]{new_y, new_x});</span>
+                    }
+                }
+<span class="pc bpc" id="L57" title="2 of 4 branches missed.">                if (x - 1 &lt; BOARD_WIDTH &amp;&amp; y + 1 &lt; BOARD_WIDTH) {   // check diagonal</span>
+<span class="pc bpc" id="L58" title="3 of 4 branches missed.">                    if (map.piece[x - 1][y + 1] != null &amp;&amp; map.piece[x - 1][y + 1].color != map.piece[x][y].color) {</span>
+<span class="nc" id="L59">                        int[] position = new int[]{y + 1, x - 1};</span>
+<span class="nc" id="L60">                        possibleMoves.add(position);</span>
+                    }
+<span class="pc bpc" id="L62" title="3 of 4 branches missed.">                    if (map.piece[x - 1][y - 1] != null &amp;&amp; map.piece[x - 1][y - 1].color != map.piece[x][y].color) {</span>
+<span class="nc" id="L63">                        int[] position = new int[]{y - 1, x - 1};</span>
+<span class="nc" id="L64">                        possibleMoves.add(position);</span>
+                    }
+                }
+<span class="fc" id="L67">            }</span>
+<span class="pc bpc" id="L68" title="1 of 2 branches missed.">        } else if (color == Color.BLACK) {  // black pawn</span>
+<span class="fc bfc" id="L69" title="All 2 branches covered.">            if (x != 1){    // if not at line 2, pawn is already moved</span>
+<span class="fc" id="L70">                hasMoved = true;</span>
+            }
+<span class="pc bpc" id="L72" title="1 of 4 branches missed.">            if (x == 1 &amp;&amp; !hasMoved) {</span>
+<span class="fc" id="L73">                int[][] offset = {{-1, 0}, {-2, 0}};</span>
+<span class="pc bpc" id="L74" title="1 of 2 branches missed.">                for (int i = 0; i &lt; 2; i++) {</span>
+<span class="fc" id="L75">                    int new_x = this.x - offset[i][0];</span>
+<span class="fc" id="L76">                    int new_y = this.y + offset[i][1];</span>
+<span class="pc bpc" id="L77" title="1 of 2 branches missed.">                    if (!isValidPosition(map, this.x, this.y, new_x, new_y)){</span>
+<span class="pc bpc" id="L78" title="5 of 10 branches missed.">                        if (new_x &gt;= 0 &amp;&amp; new_y &gt;= 0 &amp;&amp; new_x &lt;= 13 &amp;&amp; new_y &lt;= 13 &amp;&amp; map.piece[new_x][new_y].color != color)</span>
+<span class="fc" id="L79">                            possibleMoves.add(new int[]{new_y, new_x});</span>
+<span class="fc" id="L80">                        return possibleMoves;</span>
+                    } else{
+<span class="nc" id="L82">                        possibleMoves.add(new int[]{new_y, new_x});</span>
+                    }
+                }
+<span class="nc" id="L85">            } else {</span>
+<span class="fc" id="L86">                int new_x = this.x + 1;</span>
+<span class="fc" id="L87">                int new_y = this.y;</span>
+<span class="pc bpc" id="L88" title="1 of 2 branches missed.">                if (isValidPosition(map, this.x, this.y, new_x, new_y)){</span>
+<span class="fc" id="L89">                    possibleMoves.add(new int[]{new_y, new_x});</span>
+                } else {
+<span class="nc bnc" id="L91" title="All 10 branches missed.">                    if (new_x &gt;= 0 &amp;&amp; new_y &gt;= 0 &amp;&amp; new_x &lt;= 13 &amp;&amp; new_y &lt;= 13 &amp;&amp; map.piece[new_x][new_y].color != color) {</span>
+<span class="nc" id="L92">                        possibleMoves.add(new int[]{new_y, new_x});</span>
+                    }
+                }
+<span class="pc bpc" id="L95" title="2 of 4 branches missed.">                if (x - 1 &lt; BOARD_WIDTH &amp;&amp; y + 1 &lt; BOARD_WIDTH) {</span>
+<span class="pc bpc" id="L96" title="3 of 4 branches missed.">                    if (map.piece[x + 1][y + 1] != null &amp;&amp; map.piece[x + 1][y + 1].color != map.piece[x][y].color) {</span>
+<span class="nc" id="L97">                        int[] position = new int[]{y + 1, x + 1};</span>
+<span class="nc" id="L98">                        possibleMoves.add(position);</span>
+                    }
+<span class="pc bpc" id="L100" title="2 of 4 branches missed.">                    if (map.piece[x + 1][y - 1] != null &amp;&amp; map.piece[x + 1][y - 1].color != map.piece[x][y].color) {</span>
+<span class="fc" id="L101">                        int[] position = new int[]{y - 1, x + 1};</span>
+<span class="fc" id="L102">                        possibleMoves.add(position);</span>
+                    }
+                }
+            }
+        }
+<span class="fc" id="L107">        return possibleMoves;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

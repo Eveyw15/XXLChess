@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Interaction.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">xxlchess_scaffold</a> &gt; <a href="index.source.html" class="el_package">XXLChess</a> &gt; <span class="el_source">Interaction.java</span></div><h1>Interaction.java</h1><pre class="source lang-java linenums">package XXLChess;
+
+import processing.core.PImage;
+
+import static XXLChess.App.*;
+import static XXLChess.Background.State.*;
+
+<span class="nc" id="L8">public class Interaction {</span>
+<span class="fc" id="L9">    public static int selectedX = -1;</span>
+<span class="fc" id="L10">    public static int selectedY = -1;</span>
+
+    /**
+     * Get the coordinate that mouse clicked.
+     */
+    public static int[] getMouseCoordinate(int x, int y) {
+<span class="fc" id="L16">        int[] coordinate = new int[2];</span>
+<span class="fc" id="L17">        coordinate[0] = x / CELLSIZE;</span>
+<span class="fc" id="L18">        coordinate[1] = y / CELLSIZE;</span>
+        // if it is an invalid position
+<span class="pc bpc" id="L20" title="4 of 8 branches missed.">        if (coordinate[0] &gt; 13 || coordinate[0] &lt; 0 || coordinate[1] &gt; 13 || coordinate[1] &lt; 0)</span>
+<span class="nc" id="L21">            coordinate = null;</span>
+<span class="fc" id="L22">        return coordinate;</span>
+    }
+
+    /**
+     * Draw images.
+     */
+    public static void drawImages(App app, PImage image, int x, int y) {
+<span class="nc" id="L29">        x = x * CELLSIZE;</span>
+<span class="nc" id="L30">        y = y * CELLSIZE;</span>
+<span class="nc" id="L31">        app.image(image, y, x);</span>
+<span class="nc" id="L32">    }</span>
+
+    /**
+     * Get pieces by coordinate.
+     */
+    public static ChessPiece getPiece(Map map, int[] coordinate) {
+<span class="fc" id="L38">        int x = coordinate[0];</span>
+<span class="fc" id="L39">        int y = coordinate[1];</span>
+<span class="fc" id="L40">        return map.piece[y][x];</span>
+    }
+
+    /**
+     * Timer.
+     */
+    public static String timeDisplay(int totalSeconds){
+<span class="fc" id="L47">        int minutes = totalSeconds / 60; // turn seconds to minutes</span>
+<span class="fc" id="L48">        int seconds = totalSeconds % 60; // get seconds left</span>
+
+<span class="fc" id="L50">        return String.format(&quot;%02d:%02d&quot;, minutes, seconds);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

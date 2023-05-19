@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>App.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">xxlchess_scaffold</a> &gt; <a href="index.source.html" class="el_package">XXLChess</a> &gt; <span class="el_source">App.java</span></div><h1>App.java</h1><pre class="source lang-java linenums">package XXLChess;
+
+//import org.reflections.Reflections;
+//import org.reflections.scanners.Scanners;
+import processing.core.PApplet;
+import processing.core.PImage;
+import processing.data.JSONObject;
+import processing.data.JSONArray;
+import processing.core.PFont;
+import processing.event.MouseEvent;
+
+import java.awt.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+import java.io.*;
+import java.util.*;
+
+import static XXLChess.Background.*;
+import static XXLChess.Interaction.*;
+import static XXLChess.LoadImage.*;
+
+public class App extends PApplet {
+
+    public static final int SPRITESIZE = 480;
+    public static final int CELLSIZE = 48;
+    public static final int SIDEBAR = 120;
+    public static final int BOARD_WIDTH = 14;
+<span class="fc" id="L28">    public static int WIDTH = CELLSIZE*BOARD_WIDTH+SIDEBAR;</span>
+<span class="fc" id="L29">    public static int HEIGHT = BOARD_WIDTH*CELLSIZE;</span>
+    public static final int FPS = 60;
+    public static double piece_movement_speed;
+    public static int max_movement_time;
+<span class="fc" id="L33">    public boolean white_turn= true;</span>
+    public String configPath;
+    public ChessPiece selected;
+    public Map map;
+
+<span class="fc" id="L38">    int lastTimeUpdate = millis(); // Store the time of the last update</span>
+    String playerTimeDisplay;
+    String cpuTimeDisplay;
+    int playerSeconds;
+    int cpuSeconds;
+    int playerIncrement;
+    int cpuIncrement;
+    String playerColor;
+<span class="fc" id="L46">    String state = &quot;START_MENU&quot;;</span>
+
+<span class="fc" id="L48">    public App() {</span>
+<span class="fc" id="L49">        this.configPath = &quot;config.json&quot;;</span>
+<span class="fc" id="L50">    }</span>
+
+    /**
+     * Initialise the setting of the window size.
+    */
+    public void settings() {
+<span class="nc" id="L56">        size(WIDTH, HEIGHT);</span>
+<span class="nc" id="L57">    }</span>
+
+    /**
+     * Load all resources such as images. Initialise the elements such as the player, enemies and map elements.
+    */
+    public void setup() {
+<span class="nc" id="L63">        frameRate(FPS);</span>
+
+        // Load images during setup
+<span class="nc" id="L66">        LoadImage.loadImages(this);</span>
+
+		// load config
+<span class="nc" id="L69">        JSONObject conf = loadJSONObject(new File(this.configPath));</span>
+
+<span class="nc" id="L71">        String layout = conf.getString(&quot;layout&quot;);</span>
+<span class="nc" id="L72">        JSONObject timeControls = conf.getJSONObject(&quot;time_controls&quot;);</span>
+<span class="nc" id="L73">        JSONObject playerTimeControls = timeControls.getJSONObject(&quot;player&quot;);</span>
+<span class="nc" id="L74">        JSONObject cpuTimeControls = timeControls.getJSONObject(&quot;cpu&quot;);</span>
+
+<span class="nc" id="L76">        playerSeconds = playerTimeControls.getInt(&quot;seconds&quot;);</span>
+<span class="nc" id="L77">        playerIncrement = playerTimeControls.getInt(&quot;increment&quot;);</span>
+<span class="nc" id="L78">        cpuSeconds = cpuTimeControls.getInt(&quot;seconds&quot;);</span>
+<span class="nc" id="L79">        cpuIncrement = cpuTimeControls.getInt(&quot;increment&quot;);</span>
+<span class="nc" id="L80">        playerTimeDisplay = timeDisplay(playerSeconds);</span>
+<span class="nc" id="L81">        cpuTimeDisplay = timeDisplay(cpuSeconds);</span>
+
+<span class="nc" id="L83">        playerColor = conf.getString(&quot;player_colour&quot;);</span>
+<span class="nc" id="L84">        piece_movement_speed = conf.getDouble(&quot;piece_movement_speed&quot;);</span>
+<span class="nc" id="L85">        max_movement_time = conf.getInt(&quot;max_movement_time&quot;);</span>
+
+<span class="nc" id="L87">        map = new Map(this, layout);</span>
+<span class="nc" id="L88">    }</span>
+
+    /**
+     * Receive key pressed signal from the keyboard.
+    */
+    public void keyPressed(){
+<span class="nc bnc" id="L94" title="All 4 branches missed.">        if (key == 'r' || key == 'R') {</span>
+<span class="nc" id="L95">            setup();    // restart the game</span>
+<span class="nc bnc" id="L96" title="All 4 branches missed.">        } else if (key == 'e' || key == 'E'){</span>
+<span class="nc" id="L97">            gameOver(&quot;You resigned!&quot;);  // resign</span>
+<span class="nc bnc" id="L98" title="All 2 branches missed.">        } else if (key == '1'){</span>
+<span class="nc" id="L99">            state = &quot;AI&quot;;   // AI mode</span>
+<span class="nc bnc" id="L100" title="All 2 branches missed.">        } else if (key == '2') {</span>
+<span class="nc" id="L101">            state = &quot;2-player&quot;; // 2-player mode</span>
+        }
+
+<span class="nc" id="L104">    }</span>
+    
+    /**
+     * Receive key released signal from the keyboard.
+    */
+    public void keyReleased(){
+<span class="nc" id="L110">    }</span>
+
+    /**
+     * Receive mouse pressed signal.
+     */
+    @Override
+    public void mousePressed(MouseEvent e) {
+
+<span class="nc bnc" id="L118" title="All 2 branches missed.">        if (state.equals(&quot;AI&quot;)){</span>
+<span class="nc" id="L119">            ChessPiece piece = null;</span>
+<span class="nc" id="L120">            int[] coordinate = getMouseCoordinate(e.getX(), e.getY());</span>
+<span class="nc bnc" id="L121" title="All 2 branches missed.">            if (coordinate != null){    // if the position is not invalid, get piece at that position</span>
+<span class="nc" id="L122">                piece = getPiece(map, coordinate);</span>
+            }
+<span class="nc bnc" id="L124" title="All 2 branches missed.">            if (selected == null) {     // haven't chosen a piece before</span>
+<span class="nc bnc" id="L125" title="All 2 branches missed.">                if (piece == null){</span>
+<span class="nc" id="L126">                    selected = null;</span>
+<span class="nc bnc" id="L127" title="All 2 branches missed.">                } else if (piece.color == Color.WHITE) {</span>
+<span class="nc" id="L128">                    map.selectedPiece(coordinate);</span>
+<span class="nc" id="L129">                    selected = piece;</span>
+                }
+<span class="nc bnc" id="L131" title="All 2 branches missed.">            } else if (selected.color == Color.WHITE) { // white turn and choose the destination</span>
+<span class="nc bnc" id="L132" title="All 2 branches missed.">                if (coordinate == null){</span>
+<span class="nc" id="L133">                    map.cancelSelection(map.background[selected.x][selected.y]);</span>
+<span class="nc" id="L134">                    selected = null;</span>
+<span class="nc bnc" id="L135" title="All 2 branches missed.">                } else if (map.isPieceMoving(selected, coordinate[0], coordinate[1])) { // if piece is moving</span>
+<span class="nc" id="L136">                    playerSeconds += playerIncrement;   // add 2 seconds after moving for player</span>
+<span class="nc" id="L137">                    selected = null;</span>
+
+<span class="nc" id="L139">                    int[] movement = map.bestMovement();    // AI movement</span>
+<span class="nc" id="L140">                    selected = getPiece(map, new int[]{movement[1], movement[0]});</span>
+<span class="nc" id="L141">                    map.selectedPiece(new int[]{movement[1], movement[0]});</span>
+<span class="nc" id="L142">                    map.isPieceMoving(selected, movement[3], movement[2]);</span>
+<span class="nc" id="L143">                    cpuSeconds += cpuIncrement;         // add 2 seconds after moving for CPU</span>
+<span class="nc" id="L144">                    selected = null;</span>
+<span class="nc bnc" id="L145" title="All 6 branches missed.">                } else if (map.piece[coordinate[1]][coordinate[0]] != null &amp;&amp; map.piece[coordinate[1]][coordinate[0]] != selected &amp;&amp; map.piece[coordinate[1]][coordinate[0]].color == selected.color) {</span>
+<span class="nc" id="L146">                    map.selectedPiece(coordinate);  // choose another white piece</span>
+<span class="nc" id="L147">                    selected = piece;</span>
+                } else {
+<span class="nc" id="L149">                    selected = null;        // invalid piece</span>
+                }
+            } else {
+<span class="nc" id="L152">                selected = null;            // cannot choose black piece</span>
+            }
+
+
+<span class="nc bnc" id="L156" title="All 2 branches missed.">        } else if (state.equals(&quot;2-player&quot;)) {</span>
+<span class="nc" id="L157">            ChessPiece piece = null;</span>
+<span class="nc" id="L158">            int[] coordinate = getMouseCoordinate(e.getX(), e.getY());</span>
+<span class="nc bnc" id="L159" title="All 2 branches missed.">            if (coordinate != null){</span>
+<span class="nc" id="L160">                piece = getPiece(map, coordinate);</span>
+            }
+<span class="nc bnc" id="L162" title="All 2 branches missed.">            if (white_turn) {</span>
+<span class="nc bnc" id="L163" title="All 2 branches missed.">                if (selected == null) {</span>
+<span class="nc bnc" id="L164" title="All 2 branches missed.">                    if (piece == null){</span>
+<span class="nc" id="L165">                        selected = null;</span>
+<span class="nc bnc" id="L166" title="All 2 branches missed.">                    } else if (piece.color == Color.WHITE) {</span>
+<span class="nc" id="L167">                        map.selectedPiece(coordinate);</span>
+<span class="nc" id="L168">                        selected = piece;</span>
+                    }
+<span class="nc bnc" id="L170" title="All 2 branches missed.">                } else if (selected.color == Color.WHITE) {</span>
+<span class="nc bnc" id="L171" title="All 2 branches missed.">                    if (coordinate == null){</span>
+<span class="nc" id="L172">                        map.cancelSelection(map.background[selected.x][selected.y]);</span>
+<span class="nc" id="L173">                        selected = null;</span>
+<span class="nc bnc" id="L174" title="All 2 branches missed.">                    } else if (map.isPieceMoving(selected, coordinate[0], coordinate[1])) {</span>
+<span class="nc" id="L175">                        white_turn = false;</span>
+<span class="nc" id="L176">                        playerSeconds += playerIncrement;</span>
+<span class="nc" id="L177">                        selected = null;</span>
+<span class="nc bnc" id="L178" title="All 6 branches missed.">                    } else if (map.piece[coordinate[1]][coordinate[0]] != null &amp;&amp; map.piece[coordinate[1]][coordinate[0]] != selected &amp;&amp; map.piece[coordinate[1]][coordinate[0]].color == selected.color) {</span>
+<span class="nc" id="L179">                        map.selectedPiece(coordinate);</span>
+<span class="nc" id="L180">                        selected = piece;</span>
+                    } else {
+<span class="nc" id="L182">                        selected = null;</span>
+                    }
+                } else {
+<span class="nc" id="L185">                    selected = null;</span>
+                }
+            } else {
+<span class="nc bnc" id="L188" title="All 2 branches missed.">                if (selected == null) {</span>
+<span class="nc bnc" id="L189" title="All 2 branches missed.">                    if (piece == null){</span>
+<span class="nc" id="L190">                        selected = null;</span>
+<span class="nc bnc" id="L191" title="All 2 branches missed.">                    } else if (piece.color == Color.BLACK) {</span>
+<span class="nc" id="L192">                        map.selectedPiece(coordinate);</span>
+<span class="nc" id="L193">                        selected = piece;</span>
+                    }
+<span class="nc bnc" id="L195" title="All 2 branches missed.">                } else if (selected.color == Color.BLACK) {</span>
+<span class="nc bnc" id="L196" title="All 2 branches missed.">                    if (coordinate == null){</span>
+<span class="nc" id="L197">                        map.cancelSelection(map.background[selected.x][selected.y]);</span>
+<span class="nc" id="L198">                        selected = null;</span>
+<span class="nc bnc" id="L199" title="All 2 branches missed.">                    } else if (map.isPieceMoving(selected, coordinate[0], coordinate[1])) {</span>
+<span class="nc" id="L200">                        white_turn = true;</span>
+<span class="nc" id="L201">                        selected = null;</span>
+<span class="nc bnc" id="L202" title="All 4 branches missed.">                    } else if (map.piece[coordinate[1]][coordinate[0]] != null &amp;&amp; map.piece[coordinate[1]][coordinate[0]].color == selected.color) {</span>
+<span class="nc" id="L203">                        map.selectedPiece(coordinate);</span>
+<span class="nc" id="L204">                        selected = piece;</span>
+                    } else {
+<span class="nc" id="L206">                        selected = null;</span>
+                    }
+                } else {
+<span class="nc" id="L209">                    selected = null;</span>
+                }
+            }
+        }
+<span class="nc" id="L213">    }</span>
+
+
+    @Override
+    public void mouseDragged(MouseEvent e) {
+<span class="nc" id="L218">    }</span>
+
+
+    /**
+     * Draw all elements in the game by current frame. 
+    */
+    public void draw() {
+
+<span class="nc" id="L226">        background(180, 180, 180);  // background for timer</span>
+
+
+<span class="nc bnc" id="L229" title="All 2 branches missed.">        if (state.equals(&quot;START_MENU&quot;)) {   // start menu</span>
+            // Draw start menu
+<span class="nc" id="L231">            textAlign(CENTER, CENTER);</span>
+<span class="nc" id="L232">            textSize(40);</span>
+<span class="nc" id="L233">            text(&quot;Start menu&quot;, width / 2, height * 2 / 5);</span>
+<span class="nc" id="L234">            textSize(28);</span>
+<span class="nc" id="L235">            text(&quot;Select mode&quot;, width / 2, height * 8 / 15);</span>
+<span class="nc" id="L236">            textSize(20);</span>
+<span class="nc" id="L237">            text(&quot;Press 1 for AI&quot;, width / 2, height * 10 / 15);</span>
+<span class="nc" id="L238">            text(&quot;Press 2 for 2-player&quot;, width / 2, height * 11 / 15);</span>
+<span class="nc bnc" id="L239" title="All 4 branches missed.">        } else if (state.equals(&quot;AI&quot;) || state.equals(&quot;2-player&quot;)) {</span>
+<span class="nc" id="L240">            map.draw(); // Draw game</span>
+<span class="nc" id="L241">            int currentTime = millis(); // Update the timer</span>
+
+<span class="nc bnc" id="L243" title="All 2 branches missed.">            if (currentTime - lastTimeUpdate &gt;= 1000) { // 1000 milliseconds = 1 second</span>
+<span class="nc bnc" id="L244" title="All 2 branches missed.">                if (white_turn) {</span>
+<span class="nc" id="L245">                    playerSeconds--;</span>
+<span class="nc" id="L246">                    playerTimeDisplay = timeDisplay(playerSeconds);</span>
+                } else {
+<span class="nc" id="L248">                    cpuSeconds--;</span>
+<span class="nc" id="L249">                    cpuTimeDisplay = timeDisplay(cpuSeconds);</span>
+                }
+<span class="nc" id="L251">                lastTimeUpdate = currentTime;   // update the time left</span>
+            }
+
+            // display the timers
+<span class="nc" id="L255">            fill(255);</span>
+<span class="nc" id="L256">            textSize(28);</span>
+<span class="nc" id="L257">            text(playerTimeDisplay, WIDTH - SIDEBAR / 2, HEIGHT * 3 / 4);</span>
+<span class="nc" id="L258">            text(cpuTimeDisplay, WIDTH - SIDEBAR / 2, HEIGHT / 4);</span>
+
+
+<span class="nc bnc" id="L261" title="All 2 branches missed.">            if (playerSeconds == 0){</span>
+<span class="nc" id="L262">                gameOver(&quot;You lost on time!&quot;);</span>
+<span class="nc bnc" id="L263" title="All 2 branches missed.">            } else if (cpuSeconds == 0){</span>
+<span class="nc" id="L264">                gameOver(&quot;You won on time!&quot;);</span>
+            }
+<span class="nc bnc" id="L266" title="All 2 branches missed.">            if (white_turn){</span>
+<span class="nc bnc" id="L267" title="All 2 branches missed.">                if(map.isCheckmate(Color.BLACK)){</span>
+<span class="nc" id="L268">                    gameOver(&quot;You won by\ncheckmate!&quot;);</span>
+                }
+<span class="nc bnc" id="L270" title="All 2 branches missed.">            } else if (map.isCheckmate(Color.WHITE)){</span>
+<span class="nc" id="L271">                gameOver(&quot;You lost by\ncheckmate!&quot;);</span>
+            }
+        }
+<span class="nc" id="L274">    }</span>
+
+    /**
+     * Game over.
+     */
+    public void gameOver(String winner) {
+<span class="nc" id="L280">        textSize(16);</span>
+<span class="nc" id="L281">        text(winner, WIDTH - SIDEBAR / 2, HEIGHT / 2);</span>
+<span class="nc" id="L282">        noLoop();   // stop calling draw()</span>
+<span class="nc" id="L283">    }</span>
+
+    public static void main(String[] args) {
+<span class="nc" id="L286">        PApplet.main(&quot;XXLChess.App&quot;);</span>
+<span class="nc" id="L287">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
